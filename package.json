@@ -12,9 +12,14 @@
     "test:redis": "ts-node src/scripts/test-redis.ts",
     "ingest": "ts-node src/scripts/ingest.ts",
     "ingest:tx": "ts-node src/scripts/ingest-transactional.ts",
+    "seed": "ts-node prisma/seed.ts",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
