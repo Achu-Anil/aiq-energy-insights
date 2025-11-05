@@ -1,7 +1,7 @@
 import * as ExcelJS from "exceljs";
 import * as path from "path";
 import { config } from "dotenv";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 // Load environment variables
 config();

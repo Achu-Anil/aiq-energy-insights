@@ -80,7 +80,7 @@ services:
       retries: 3
       start_period: 40s
     # Run migrations and start app
-    command: sh -c "npx prisma migrate deploy && npx prisma db seed && node dist/main.js"
+    command: sh -c "npx prisma migrate deploy && node dist/main.js"
 
 networks:
   backend:

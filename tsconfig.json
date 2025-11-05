@@ -31,7 +31,16 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "exclude": ["node_modules", "dist", "prisma"],
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "prisma",
+    "scripts",
+    "test",
+    "**/*.spec.ts",
+    "**/*.e2e-spec.ts"
+  ],
   "ts-node": {
     "esm": false
   }

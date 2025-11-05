@@ -7,7 +7,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 /**
  * HTTP Exception Filter
@@ -25,7 +25,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
 
     // Extract trace ID from request headers or generate new one
-    const traceId = (request.headers["x-trace-id"] as string) || uuidv4();
+    const traceId = (request.headers["x-trace-id"] as string) || randomUUID();
 
     // Get exception response (may be string or object)
     const exceptionResponse = exception.getResponse();
@@ -76,7 +76,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const traceId = (request.headers["x-trace-id"] as string) || uuidv4();
+    const traceId = (request.headers["x-trace-id"] as string) || randomUUID();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = "Internal server error";

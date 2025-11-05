@@ -1,13 +1,43 @@
+# Dependencies
 node_modules
 
+# Build output (compiled TypeScript)
+dist/
+build/
+*.js
+*.js.map
+!jest.config.js
+!prisma/seed.js
+
+# Generated Prisma client
 /src/generated/prisma
 
-# Ignore environment variables
+# Environment variables
 .env
+.env.local
+.env.*.local
 
-# Ignore test coverage reports (auto-generated)
+# Test coverage reports (auto-generated)
 coverage/
 *.lcov
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # Ignore all Markdown files
 *.md
