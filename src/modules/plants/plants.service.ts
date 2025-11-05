@@ -1,7 +1,8 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException, Inject } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { GetPlantsQueryDto, PlantResponseDto } from "./dto/plants.dto";
 import { PlantRepository } from "./repositories/plant.repository";
+import { Redis } from "ioredis";
 
 /**
  * PlantsService
@@ -12,10 +13,12 @@ import { PlantRepository } from "./repositories/plant.repository";
 @Injectable()
 export class PlantsService {
   private readonly logger = new Logger(PlantsService.name);
+  private readonly CACHE_TTL = 3600; // 1 hour in seconds
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly plantRepository: PlantRepository
+    private readonly plantRepository: PlantRepository,
+    @Inject("REDIS_CLIENT") private readonly redis: Redis
   ) {}
 
   /**
@@ -28,10 +31,24 @@ export class PlantsService {
     const startTime = Date.now();
 
     try {
+      // Generate cache key
+      const cacheKey = `plants:top:${query.top || 10}:${query.state || "ALL"}:${
+        query.year || "ALL"
+      }`;
+
+      // Try to get from cache
+      const cached = await this.redis.get(cacheKey);
+      if (cached) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cached);
+      }
+
       this.logger.log(
-        `Getting top ${query.top || 10} plants for state: ${
-          query.state || "ALL"
-        }, year: ${query.year || "ALL"}`
+        `Cache miss for ${cacheKey}. Getting top ${
+          query.top || 10
+        } plants for state: ${query.state || "ALL"}, year: ${
+          query.year || "ALL"
+        }`
       );
 
       // Delegate to repository layer
@@ -47,7 +64,7 @@ export class PlantsService {
         `Retrieved ${plants.length} plants in ${Date.now() - startTime}ms`
       );
 
-      return plants.map((plant, index) => ({
+      const result = plants.map((plant, index) => ({
         id: plant.id,
         plantId: plant.plantId,
         name: plant.name,
@@ -57,6 +74,14 @@ export class PlantsService {
         percentOfState: plant.percentOfState,
         rank: index + 1,
       }));
+
+      // Cache the result
+      await this.redis.setex(cacheKey, this.CACHE_TTL, JSON.stringify(result));
+      this.logger.log(
+        `Cached result with key ${cacheKey} for ${this.CACHE_TTL}s`
+      );
+
+      return result;
     } catch (error) {
       this.logger.error(`Failed to get top plants: ${error}`);
       throw error;
@@ -73,7 +98,19 @@ export class PlantsService {
     const startTime = Date.now();
 
     try {
-      this.logger.log(`Getting plant details for ID: ${plantId}`);
+      // Generate cache key
+      const cacheKey = `plant:${plantId}`;
+
+      // Try to get from cache
+      const cached = await this.redis.get(cacheKey);
+      if (cached) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cached);
+      }
+
+      this.logger.log(
+        `Cache miss for ${cacheKey}. Getting plant details for ID: ${plantId}`
+      );
 
       const plant = await this.plantRepository.getPlantById(plantId);
 
@@ -83,6 +120,12 @@ export class PlantsService {
 
       this.logger.log(
         `Retrieved plant ${plantId} in ${Date.now() - startTime}ms`
+      );
+
+      // Cache the result
+      await this.redis.setex(cacheKey, this.CACHE_TTL, JSON.stringify(plant));
+      this.logger.log(
+        `Cached result with key ${cacheKey} for ${this.CACHE_TTL}s`
       );
 
       return plant;

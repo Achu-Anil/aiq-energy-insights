@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+_.log
+.env
+.git
+.gitignore
+.github
+_.md
+test
+tsconfig.json
+jest.config.js
+nodemon.json
+.vscode
+.idea

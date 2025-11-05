@@ -78,10 +78,10 @@ describe("StatesService", () => {
     };
 
     const mockRedis = {
-      get: jest.fn(),
-      set: jest.fn(),
-      setex: jest.fn(),
-      del: jest.fn(),
+      get: jest.fn().mockResolvedValue(null), // Default: cache miss
+      set: jest.fn().mockResolvedValue("OK"),
+      setex: jest.fn().mockResolvedValue("OK"),
+      del: jest.fn().mockResolvedValue(1),
     };
 
     const module: TestingModule = await Test.createTestingModule({

@@ -65,6 +65,13 @@ describe("PlantsService", () => {
       $disconnect: jest.fn(),
     };
 
+    // Create mock Redis client
+    const mockRedis = {
+      get: jest.fn().mockResolvedValue(null), // Default: cache miss
+      setex: jest.fn().mockResolvedValue("OK"),
+      del: jest.fn().mockResolvedValue(1),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PlantsService,
@@ -75,6 +82,10 @@ describe("PlantsService", () => {
         {
           provide: PrismaService,
           useValue: mockPrisma,
+        },
+        {
+          provide: "REDIS_CLIENT",
+          useValue: mockRedis,
         },
       ],
     }).compile();
