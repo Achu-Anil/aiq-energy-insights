@@ -211,17 +211,14 @@ async function upsertStatesToDB(
   console.log("\n=== Upserting States to Database ===");
   const stateIdMap = new Map<string, number>();
 
-  for (const [stateCode, totalGeneration] of stateGenerationMap.entries()) {
-    // Upsert state (create if not exists, update if exists)
+  for (const [stateCode] of stateGenerationMap.entries()) {
+    // Upsert state (create if not exists)
     const state = await prisma.state.upsert({
       where: { code: stateCode },
-      update: {
-        totalGeneration,
-      },
+      update: {},
       create: {
         code: stateCode,
         name: stateCode, // Using code as name for now, can be enhanced
-        totalGeneration,
       },
     });
 
@@ -253,16 +250,21 @@ async function upsertPlantsToDB(
   plants: PlantDataWithPercent[],
   stateIdMap: Map<string, number>
 ): Promise<void> {
-  console.log("\n=== Upserting Plants to Database ===");
+  console.log("\n=== Upserting Plants and Generations to Database ===");
 
-  // Delete all existing plants before inserting new ones
+  // Delete all existing plant generations and plants
+  await prisma.plantGeneration.deleteMany({});
+  console.log(`✓ Deleted existing plant generations`);
+
   const deleteResult = await prisma.plant.deleteMany({});
   console.log(`✓ Deleted ${deleteResult.count} existing plants`);
 
   let successCount = 0;
   let errorCount = 0;
 
-  // Batch upsert plants
+  const currentYear = 2023; // eGRID 2023 data
+
+  // Batch upsert plants with generations
   for (const plant of plants) {
     try {
       const stateId = stateIdMap.get(plant.stateCode);
@@ -273,12 +275,17 @@ async function upsertPlantsToDB(
         continue;
       }
 
+      // Create plant with its generation data
       await prisma.plant.create({
         data: {
           name: plant.plantName,
           stateId: stateId,
-          netGeneration: plant.netGeneration,
-          percentOfState: plant.percentOfState,
+          generations: {
+            create: {
+              year: currentYear,
+              netGeneration: plant.netGeneration,
+            },
+          },
         },
       });
 
@@ -294,9 +301,28 @@ async function upsertPlantsToDB(
     }
   }
 
-  console.log(`✓ Successfully inserted ${successCount} plants`);
+  console.log(
+    `✓ Successfully inserted ${successCount} plants with generation data`
+  );
   if (errorCount > 0) {
     console.log(`✗ Failed to insert ${errorCount} plants`);
+  }
+}
+
+async function refreshMaterializedView(): Promise<void> {
+  console.log("\n=== Refreshing Materialized View ===");
+
+  try {
+    const startTime = Date.now();
+
+    // Use raw SQL to refresh the materialized view
+    await prisma.$executeRaw`REFRESH MATERIALIZED VIEW state_generation_mv`;
+
+    const duration = Date.now() - startTime;
+    console.log(`✓ Materialized view refreshed successfully in ${duration}ms`);
+  } catch (error) {
+    console.error("✗ Failed to refresh materialized view:", error);
+    throw error;
   }
 }
 
@@ -343,11 +369,16 @@ async function main() {
   const stateIdMap = await upsertStatesToDB(stateGenerationMap);
   await upsertPlantsToDB(plantsWithPercentages, stateIdMap);
 
+  // Refresh materialized view once after all data is loaded
+  await refreshMaterializedView();
+
   console.log("\n=== Database Summary ===");
   const stateCount = await prisma.state.count();
   const plantCount = await prisma.plant.count();
+  const generationCount = await prisma.plantGeneration.count();
   console.log(`Total states in DB: ${stateCount}`);
   console.log(`Total plants in DB: ${plantCount}`);
+  console.log(`Total generation records in DB: ${generationCount}`);
 }
 
 main()
