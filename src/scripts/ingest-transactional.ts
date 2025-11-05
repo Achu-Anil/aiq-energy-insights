@@ -234,7 +234,7 @@ async function rebuildHotPayloads(): Promise<void> {
     const startTime = Date.now();
 
     // Initialize services
-    const stateRepository = new StateRepository(prisma, redis);
+    const stateRepository = new StateRepository(prisma as any, redis);
     const cacheWarmingService = new CacheWarmingService(redis, stateRepository);
 
     // Warm all state caches

@@ -1,6 +1,7 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { PrismaClient } from "../../../generated/prisma/client";
+import { Injectable, Logger, Inject } from "@nestjs/common";
+import { PrismaService } from "../../../prisma/prisma.service";
 import { Redis } from "ioredis";
+import { REDIS_CLIENT } from "../../../redis/redis.module";
 
 /**
  * State repository with caching layer
@@ -12,8 +13,8 @@ export class StateRepository {
   private readonly CACHE_TTL = 3600; // 1 hour in seconds
 
   constructor(
-    private readonly prisma: PrismaClient,
-    private readonly redis: Redis
+    private readonly prisma: PrismaService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis
   ) {}
 
   /**
