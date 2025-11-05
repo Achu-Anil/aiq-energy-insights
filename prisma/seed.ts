@@ -1,6 +1,6 @@
-import { PrismaClient } from '../src/generated/prisma/client';
-import * as fs from 'fs';
-import * as path from 'path';
+import { PrismaClient } from "../src/generated/prisma/client";
+import * as fs from "fs";
+import * as path from "path";
 
 const prisma = new PrismaClient();
 
@@ -24,20 +24,20 @@ interface PlantData {
  * ]
  */
 async function seed() {
-  console.log('🌱 Starting database seed...\n');
+  console.log("🌱 Starting database seed...\n");
 
   try {
     // Read JSON data file
-    const dataPath = path.join(__dirname, '../data/plants-export.json');
-    
+    const dataPath = path.join(__dirname, "../data/plants-export.json");
+
     if (!fs.existsSync(dataPath)) {
-      console.log('⚠️  No JSON export found at:', dataPath);
-      console.log('Creating sample data instead...\n');
+      console.log("⚠️  No JSON export found at:", dataPath);
+      console.log("Creating sample data instead...\n");
       await seedSampleData();
       return;
     }
 
-    const rawData = fs.readFileSync(dataPath, 'utf-8');
+    const rawData = fs.readFileSync(dataPath, "utf-8");
     const plants: PlantData[] = JSON.parse(rawData);
 
     console.log(`📊 Found ${plants.length} plants in JSON export\n`);
@@ -54,7 +54,7 @@ async function seed() {
     });
 
     // Step 1: Upsert states
-    console.log('Step 1: Upserting states...');
+    console.log("Step 1: Upserting states...");
     const stateIdMap = new Map<string, number>();
 
     for (const [code, stateData] of stateMap.entries()) {
@@ -68,7 +68,7 @@ async function seed() {
     console.log(`✓ Upserted ${stateIdMap.size} states\n`);
 
     // Step 2: Upsert plants and plant generations
-    console.log('Step 2: Upserting plants and generations...');
+    console.log("Step 2: Upserting plants and generations...");
     let plantCount = 0;
     let generationCount = 0;
     const defaultYear = 2021;
@@ -127,11 +127,11 @@ async function seed() {
     console.log(`✓ Upserted ${generationCount} generation records\n`);
 
     // Step 3: Compute state totals (aggregate to StateGeneration table)
-    console.log('Step 3: Computing state generation totals...');
+    console.log("Step 3: Computing state generation totals...");
     await computeStateGenerationTotals();
 
     // Step 4: Display summary
-    console.log('\n📈 Database Summary:');
+    console.log("\n📈 Database Summary:");
     const finalStateCount = await prisma.state.count();
     const finalPlantCount = await prisma.plant.count();
     const finalGenerationCount = await prisma.plantGeneration.count();
@@ -142,9 +142,9 @@ async function seed() {
     console.log(`  Plant Generations: ${finalGenerationCount}`);
     console.log(`  State Generations: ${finalStateGenerationCount}`);
 
-    console.log('\n✅ Seed completed successfully!');
+    console.log("\n✅ Seed completed successfully!");
   } catch (error) {
-    console.error('\n❌ Seed failed:', error);
+    console.error("\n❌ Seed failed:", error);
     throw error;
   }
 }
@@ -163,7 +163,9 @@ async function computeStateGenerationTotals() {
     ORDER BY p.state_id, pg.year
   `;
 
-  console.log(`  Found ${combinations.length} state-year combinations to aggregate`);
+  console.log(
+    `  Found ${combinations.length} state-year combinations to aggregate`
+  );
 
   for (const combo of combinations) {
     // Aggregate total generation for this state and year
@@ -203,16 +205,16 @@ async function computeStateGenerationTotals() {
  * Seed sample data for testing when no JSON export exists
  */
 async function seedSampleData() {
-  console.log('🌱 Seeding sample data...\n');
+  console.log("🌱 Seeding sample data...\n");
 
   // Create sample states
   const states = [
-    { code: 'TX', name: 'Texas' },
-    { code: 'CA', name: 'California' },
-    { code: 'FL', name: 'Florida' },
+    { code: "TX", name: "Texas" },
+    { code: "CA", name: "California" },
+    { code: "FL", name: "Florida" },
   ];
 
-  console.log('Step 1: Creating sample states...');
+  console.log("Step 1: Creating sample states...");
   const stateIdMap = new Map<string, number>();
 
   for (const stateData of states) {
@@ -226,13 +228,38 @@ async function seedSampleData() {
   console.log(`✓ Created ${states.length} states\n`);
 
   // Create sample plants
-  console.log('Step 2: Creating sample plants and generations...');
+  console.log("Step 2: Creating sample plants and generations...");
   const samplePlants = [
-    { name: 'South Texas Project', stateCode: 'TX', netGeneration: 21787144, year: 2021 },
-    { name: 'Comanche Peak', stateCode: 'TX', netGeneration: 18653890, year: 2021 },
-    { name: 'Diablo Canyon', stateCode: 'CA', netGeneration: 17892234, year: 2021 },
-    { name: 'Palo Verde', stateCode: 'CA', netGeneration: 31522590, year: 2021 },
-    { name: 'Turkey Point', stateCode: 'FL', netGeneration: 20061348, year: 2021 },
+    {
+      name: "South Texas Project",
+      stateCode: "TX",
+      netGeneration: 21787144,
+      year: 2021,
+    },
+    {
+      name: "Comanche Peak",
+      stateCode: "TX",
+      netGeneration: 18653890,
+      year: 2021,
+    },
+    {
+      name: "Diablo Canyon",
+      stateCode: "CA",
+      netGeneration: 17892234,
+      year: 2021,
+    },
+    {
+      name: "Palo Verde",
+      stateCode: "CA",
+      netGeneration: 31522590,
+      year: 2021,
+    },
+    {
+      name: "Turkey Point",
+      stateCode: "FL",
+      netGeneration: 20061348,
+      year: 2021,
+    },
   ];
 
   for (const plant of samplePlants) {
@@ -257,10 +284,10 @@ async function seedSampleData() {
   console.log(`✓ Created ${samplePlants.length} plants with generations\n`);
 
   // Compute state totals
-  console.log('Step 3: Computing state generation totals...');
+  console.log("Step 3: Computing state generation totals...");
   await computeStateGenerationTotals();
 
-  console.log('\n✅ Sample seed completed successfully!');
+  console.log("\n✅ Sample seed completed successfully!");
 }
 
 /**
