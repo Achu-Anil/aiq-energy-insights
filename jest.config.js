@@ -3,6 +3,8 @@ module.exports = {
   testEnvironment: "node",
   roots: ["<rootDir>/src", "<rootDir>/test"],
   testMatch: ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
+  // Exclude integration tests from normal test runs (they require real database)
+  testPathIgnorePatterns: ["/node_modules/", "\\.integration\\.spec\\.ts$"],
   transform: {
     "^.+\\.ts$": "ts-jest",
   },
@@ -21,24 +23,21 @@ module.exports = {
   coverageReporters: ["text", "lcov", "html"],
   coverageThreshold: {
     // Only check coverage for tested business logic (not infrastructure)
+    // Service layer (business logic) - unit tested with mocked dependencies
     "./src/modules/plants/plants.service.ts": {
-      branches: 75,
+      branches: 80,
+      functions: 100,
+      lines: 98,
+      statements: 98,
+    },
+    "./src/modules/states/states.service.ts": {
+      branches: 70,
       functions: 100,
       lines: 95,
       statements: 95,
     },
-    "./src/modules/states/states.service.ts": {
-      branches: 60,
-      functions: 80,
-      lines: 90,
-      statements: 90,
-    },
-    "./src/modules/plants/repositories/plant.repository.ts": {
-      branches: 80,
-      functions: 95,
-      lines: 95,
-      statements: 95,
-    },
+    // Repository layer requires integration tests with real database
+    // These thresholds are enforced separately in integration test suite
   },
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",

@@ -15,6 +15,7 @@ import { GetStatesQueryDto, GetStateDetailQueryDto } from "./dto/states.dto";
 describe("StatesService", () => {
   let service: StatesService;
   let plantRepository: jest.Mocked<PlantRepository>;
+  let mockRedis: any;
 
   // Mock data fixtures
   const mockStatesSummary = [
@@ -77,7 +78,7 @@ describe("StatesService", () => {
       $disconnect: jest.fn(),
     };
 
-    const mockRedis = {
+    mockRedis = {
       get: jest.fn().mockResolvedValue(null), // Default: cache miss
       set: jest.fn().mockResolvedValue("OK"),
       setex: jest.fn().mockResolvedValue("OK"),
@@ -108,6 +109,7 @@ describe("StatesService", () => {
 
     service = module.get<StatesService>(StatesService);
     plantRepository = module.get(PlantRepository);
+    mockRedis = module.get("REDIS_CLIENT");
   });
 
   afterEach(() => {
@@ -205,6 +207,21 @@ describe("StatesService", () => {
       await expect(service.getStatesSummary(query)).rejects.toThrow(
         "Database connection failed"
       );
+    });
+
+    it("should return cached data on cache hit", async () => {
+      // Arrange
+      const query: GetStatesQueryDto = { year: 2023 };
+      const cachedData = JSON.stringify(mockStatesSummary);
+      mockRedis.get.mockResolvedValueOnce(cachedData);
+
+      // Act
+      const result = await service.getStatesSummary(query);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(mockRedis.get).toHaveBeenCalled();
+      expect(plantRepository.getStatesSummary).not.toHaveBeenCalled(); // Should not hit repository
     });
   });
 
@@ -364,6 +381,23 @@ describe("StatesService", () => {
       expect(result.topPlants).toHaveLength(3);
       expect(result.topPlants[0].rank).toBe(1);
       expect(result.topPlants[2].rank).toBe(3);
+    });
+
+    it("should return cached state detail on cache hit", async () => {
+      // Arrange
+      const code = "TX";
+      const query: GetStateDetailQueryDto = { year: 2023, topPlants: 10 };
+      const cachedData = JSON.stringify(mockStateDetail);
+      mockRedis.get.mockResolvedValueOnce(cachedData);
+
+      // Act
+      const result = await service.getStateDetail(code, query);
+
+      // Assert
+      expect(result).toEqual(mockStateDetail);
+      expect(mockRedis.get).toHaveBeenCalled();
+      expect(plantRepository.getStateDetail).not.toHaveBeenCalled(); // Should not hit repository
+      expect(plantRepository.getTopNPlants).not.toHaveBeenCalled(); // Should not hit repository
     });
   });
 

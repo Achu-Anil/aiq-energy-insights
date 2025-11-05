@@ -14,6 +14,7 @@ import { GetPlantsQueryDto } from "./dto/plants.dto";
 describe("PlantsService", () => {
   let service: PlantsService;
   let plantRepository: jest.Mocked<PlantRepository>;
+  let mockRedis: any;
 
   // Mock data fixtures
   const mockPlants = [
@@ -66,7 +67,7 @@ describe("PlantsService", () => {
     };
 
     // Create mock Redis client
-    const mockRedis = {
+    mockRedis = {
       get: jest.fn().mockResolvedValue(null), // Default: cache miss
       setex: jest.fn().mockResolvedValue("OK"),
       del: jest.fn().mockResolvedValue(1),
@@ -92,6 +93,7 @@ describe("PlantsService", () => {
 
     service = module.get<PlantsService>(PlantsService);
     plantRepository = module.get(PlantRepository);
+    mockRedis = module.get("REDIS_CLIENT");
   });
 
   afterEach(() => {
@@ -225,6 +227,21 @@ describe("PlantsService", () => {
         "Database connection failed"
       );
     });
+
+    it("should return cached data on cache hit", async () => {
+      // Arrange
+      const query: GetPlantsQueryDto = { top: 10 };
+      const cachedData = JSON.stringify(mockPlants);
+      mockRedis.get.mockResolvedValueOnce(cachedData);
+
+      // Act
+      const result = await service.getTopPlants(query);
+
+      // Assert
+      expect(result).toEqual(mockPlants);
+      expect(mockRedis.get).toHaveBeenCalled();
+      expect(plantRepository.getTopNPlants).not.toHaveBeenCalled(); // Should not hit repository
+    });
   });
 
   describe("getPlantById", () => {
@@ -289,6 +306,35 @@ describe("PlantsService", () => {
       // Assert
       expect(result.generations).toHaveLength(3);
       expect(result.generations[0].year).toBe(2023);
+    });
+
+    it("should return cached plant data on cache hit", async () => {
+      // Arrange
+      const plantId = 1;
+      const cachedData = JSON.stringify(mockPlantDetail);
+      mockRedis.get.mockResolvedValueOnce(cachedData);
+
+      // Act
+      const result = await service.getPlantById(plantId);
+
+      // Assert
+      expect(result).toEqual(mockPlantDetail);
+      expect(mockRedis.get).toHaveBeenCalled();
+      expect(plantRepository.getPlantById).not.toHaveBeenCalled(); // Should not hit repository
+    });
+
+    it("should throw NotFoundException when repository returns null", async () => {
+      // Arrange
+      const plantId = 123;
+      plantRepository.getPlantById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.getPlantById(plantId)).rejects.toThrow(
+        NotFoundException
+      );
+      await expect(service.getPlantById(plantId)).rejects.toThrow(
+        `Plant with ID ${plantId} not found`
+      );
     });
   });
 
