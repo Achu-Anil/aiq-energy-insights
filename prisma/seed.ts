@@ -207,6 +207,10 @@ async function computeStateGenerationTotals() {
 async function seedSampleData() {
   console.log("🌱 Seeding sample data...\n");
 
+  // Get year from environment variable or use default
+  const seedYear = parseInt(process.env.TEST_SEED_YEAR || "2023", 10);
+  console.log(`📅 Using seed year: ${seedYear}\n`);
+
   // Create sample states
   const states = [
     { code: "TX", name: "Texas" },
@@ -234,31 +238,31 @@ async function seedSampleData() {
       name: "South Texas Project",
       stateCode: "TX",
       netGeneration: 21787144,
-      year: 2021,
+      year: seedYear,
     },
     {
       name: "Comanche Peak",
       stateCode: "TX",
       netGeneration: 18653890,
-      year: 2021,
+      year: seedYear,
     },
     {
       name: "Diablo Canyon",
       stateCode: "CA",
       netGeneration: 17892234,
-      year: 2021,
+      year: seedYear,
     },
     {
       name: "Palo Verde",
       stateCode: "CA",
       netGeneration: 31522590,
-      year: 2021,
+      year: seedYear,
     },
     {
       name: "Turkey Point",
       stateCode: "FL",
       netGeneration: 20061348,
-      year: 2021,
+      year: seedYear,
     },
   ];
 
