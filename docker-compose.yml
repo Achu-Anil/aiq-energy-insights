@@ -1,73 +1,119 @@
+# ==================================
+# Docker Compose Configuration
+# ==================================
+# Orchestrates the full application stack:
+# - PostgreSQL 14 (database)
+# - Redis 7 (caching layer)
+# - NestJS API (application)
+#
+# Usage:
+#   docker compose up -d          # Start all services in background
+#   docker compose down           # Stop and remove all containers
+#   docker compose logs app       # View application logs
+#   docker compose ps             # Check service status
+#   docker compose restart app    # Restart application only
+#
+# Networks:
+#   All services communicate via 'backend' bridge network
+#   Services reference each other by service name (e.g., postgres, redis)
+#
+# Volumes:
+#   Data persists across container restarts via named volumes
+# ==================================
+
 version: "3.8"
 
 services:
-  # PostgreSQL Database
+  # ==================================
+  # PostgreSQL Database Service
+  # ==================================
+  # Primary data store for power plant generation data
+  # - Image: postgres:14-alpine (lightweight, production-ready)
+  # - Data persistence: postgres_data volume
+  # - Health checks: Validates database is accepting connections
   postgres:
     image: postgres:14-alpine
     container_name: aiq-postgres
-    restart: unless-stopped
+    restart: unless-stopped # Auto-restart on failure, but not on manual stop
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: app_db
+      POSTGRES_USER: postgres # Default superuser
+      POSTGRES_PASSWORD: postgres # Change in production!
+      POSTGRES_DB: app_db # Database name for application
     ports:
-      - "5432:5432"
+      - "5432:5432" # Expose to host for development tools (pgAdmin, DBeaver)
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data # Persist database files
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U postgres"] # Check if accepting connections
+      interval: 10s # Check every 10 seconds
+      timeout: 5s # Wait up to 5 seconds for response
+      retries: 5 # Retry 5 times before marking unhealthy
 
-  # Redis Cache
+  # ==================================
+  # Redis Cache Service
+  # ==================================
+  # In-memory cache for API responses and computed data
+  # - Image: redis:7-alpine (latest stable, lightweight)
+  # - Data persistence: AOF (Append-Only File) for durability
+  # - Health checks: Validates Redis is responding to commands
   redis:
     image: redis:7-alpine
     container_name: aiq-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6379:6379" # Expose to host for Redis CLI/RedisInsight
     volumes:
-      - redis_data:/data
+      - redis_data:/data # Persist cache data (AOF file)
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "ping"] # Should return PONG
       interval: 10s
       timeout: 3s
       retries: 5
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes # Enable AOF persistence
 
-  # NestJS Application
+  # ==================================
+  # NestJS Application Service
+  # ==================================
+  # Main API server for power plant generation queries
+  # - Built from local Dockerfile (multi-stage build)
+  # - Waits for database and Redis to be healthy before starting
+  # - Runs Prisma migrations on startup
+  # - Health checks: Validates API is responding
   app:
     build:
-      context: .
+      context: . # Build from current directory
       dockerfile: Dockerfile
     container_name: aiq-app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3000:3000" # API accessible at http://localhost:3000/api
     environment:
-      # Database
+      # Database Configuration
+      # Note: 'postgres' hostname resolves to postgres service via Docker network
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/app_db
 
-      # Redis
+      # Redis Configuration
+      # Note: 'redis' hostname resolves to redis service via Docker network
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
-      # Application
+      # Application Settings
       NODE_ENV: production
       PORT: 3000
     depends_on:
+      # Wait for dependencies to be healthy before starting
       postgres:
-        condition: service_healthy
+        condition: service_healthy # Postgres must pass health check
       redis:
-        condition: service_healthy
+        condition: service_healthy # Redis must pass health check
     networks:
       - backend
     healthcheck:
+      # Check if API health endpoint responds with 200 OK
       test:
         [
           "CMD",
@@ -75,11 +121,12 @@ services:
           "-e",
           "require('http').get('http://localhost:3000/api/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))",
         ]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 40s
-    # Run migrations and start app
+      interval: 30s # Check every 30 seconds
+      timeout: 3s # Wait up to 3 seconds for response
+      retries: 3 # Retry 3 times before marking unhealthy
+      start_period: 40s # Give app 40 seconds to start before health checks count
+    # Startup command: Run database migrations then start app
+    # This ensures database schema is always up-to-date
     command: sh -c "npx prisma migrate deploy && node dist/main.js"
 
 networks:
