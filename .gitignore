@@ -5,5 +5,9 @@ node_modules
 # Ignore environment variables
 .env
 
+# Ignore test coverage reports (auto-generated)
+coverage/
+*.lcov
+
 # Ignore all Markdown files
 *.md
