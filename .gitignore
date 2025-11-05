@@ -1,3 +1,9 @@
 node_modules
 
 /src/generated/prisma
+
+# Ignore environment variables
+.env
+
+# Ignore all Markdown files
+*.md

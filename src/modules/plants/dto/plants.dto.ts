@@ -200,47 +200,8 @@ export class StateSummaryResponseDto {
   plantCount!: number;
 }
 
-/**
- * Generic error response DTO
- */
-export class ErrorResponseDto {
-  @ApiProperty({ description: "HTTP status code", example: 400 })
-  statusCode!: number;
-
-  @ApiProperty({
-    description: "Error message or array of validation errors",
-    example: ["top must be at least 1", "state must be 2 uppercase letters"],
-  })
-  message!: string | string[];
-
-  @ApiProperty({ description: "Error type", example: "Bad Request" })
-  error!: string;
-
-  @ApiProperty({
-    description: "Request timestamp",
-    example: "2023-11-05T10:30:00.000Z",
-  })
-  timestamp?: string;
-
-  @ApiProperty({ description: "Request path", example: "/plants" })
-  path?: string;
-}
-
-/**
- * Paginated response wrapper (for future use)
- */
-export class PaginatedResponseDto<T> {
-  @ApiProperty({ description: "Data array", isArray: true })
-  data!: T[];
-
-  @ApiProperty({
-    description: "Metadata about the query",
-    example: { year: 2023, top: 10, state: "TX" },
-  })
-  meta!: {
-    year?: number;
-    top?: number;
-    state?: string;
-    total?: number;
-  };
-}
+// Re-export common DTOs
+export {
+  ErrorResponseDto,
+  PaginatedResponseDto,
+} from "../../../common/dto/common.dto";

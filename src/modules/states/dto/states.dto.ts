@@ -179,49 +179,11 @@ export class StateDetailResponseDto {
   }>;
 }
 
-/**
- * Generic error response DTO
- */
-export class ErrorResponseDto {
-  @ApiProperty({ description: "HTTP status code", example: 400 })
-  statusCode!: number;
-
-  @ApiProperty({
-    description: "Error message or array of validation errors",
-    example: [
-      "year must be an integer",
-      "state code must be 2 uppercase letters",
-    ],
-  })
-  message!: string | string[];
-
-  @ApiProperty({ description: "Error type", example: "Bad Request" })
-  error!: string;
-
-  @ApiProperty({
-    description: "Request timestamp",
-    example: "2023-11-05T10:30:00.000Z",
-    required: false,
-  })
-  timestamp?: string;
-
-  @ApiProperty({
-    description: "Request path",
-    example: "/states/TX",
-    required: false,
-  })
-  path?: string;
-
-  @ApiProperty({
-    description: "Correlation ID for tracing",
-    example: "123e4567-e89b-12d3-a456-426614174000",
-    required: false,
-  })
-  traceId?: string;
-}
+// Re-export common DTOs
+export { ErrorResponseDto } from "../../../common/dto/common.dto";
 
 /**
- * Paginated response wrapper
+ * Paginated response wrapper for states
  */
 export class PaginatedStatesResponseDto {
   @ApiProperty({
