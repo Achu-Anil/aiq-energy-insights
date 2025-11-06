@@ -8,7 +8,7 @@ process.env.NODE_ENV = "test";
 process.env.DATABASE_URL =
   process.env.DATABASE_URL_TEST ||
   process.env.DATABASE_URL ||
-  "postgresql://dev:dev@localhost:5432/powerplants_test";
+  "postgresql://test:test@localhost:5432/test_db";
 
 // Suppress console logs during tests (optional - uncomment to enable)
 // global.console = {
