@@ -7,6 +7,7 @@ build/
 *.js
 *.js.map
 !jest.config.js
+!jest.e2e.config.js
 !prisma/seed.js
 
 # Generated Prisma client
