@@ -868,8 +868,6 @@ This project is developed for educational and technical assessment purposes.
 
 This is a technical assessment project. External contributions are not accepted at this time.
 
-For internal development guidelines, see [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
-
 ---
 
 ## 📧 Support & Contact
