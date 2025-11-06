@@ -3,8 +3,12 @@ module.exports = {
   testEnvironment: "node",
   roots: ["<rootDir>/src", "<rootDir>/test"],
   testMatch: ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
-  // Exclude integration tests from normal test runs (they require real database)
-  testPathIgnorePatterns: ["/node_modules/", "\\.integration\\.spec\\.ts$"],
+  // Exclude integration and e2e tests from normal test runs (they require real database/running app)
+  // Note: When running test:integration or test:e2e, the --testPathPatterns flag will override this
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/dist/",
+  ],
   transform: {
     "^.+\\.ts$": "ts-jest",
   },
