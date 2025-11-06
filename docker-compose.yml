@@ -33,7 +33,7 @@ services:
   # - Health checks: Validates database is accepting connections
   postgres:
     image: postgres:14-alpine
-    container_name: aiq-postgres
+    container_name: aiq-energy-insights-postgres
     restart: unless-stopped # Auto-restart on failure, but not on manual stop
     environment:
       POSTGRES_USER: postgres # Default superuser
@@ -60,7 +60,7 @@ services:
   # - Health checks: Validates Redis is responding to commands
   redis:
     image: redis:7-alpine
-    container_name: aiq-redis
+    container_name: aiq-energy-insights-redis
     restart: unless-stopped
     ports:
       - "6379:6379" # Expose to host for Redis CLI/RedisInsight
@@ -87,7 +87,7 @@ services:
     build:
       context: . # Build from current directory
       dockerfile: Dockerfile
-    container_name: aiq-app
+    container_name: aiq-energy-insights-app
     restart: unless-stopped
     ports:
       - "3000:3000" # API accessible at http://localhost:3000/api

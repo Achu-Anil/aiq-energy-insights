@@ -1,7 +1,7 @@
 {
-  "name": "aiq-backend-challenge1",
+  "name": "aiq-energy-insights",
   "version": "1.0.0",
-  "description": "",
+  "description": "Production-grade REST API for U.S. power plant energy generation insights",
   "main": "dist/main.js",
   "scripts": {
     "dev": "nodemon src/main.ts",

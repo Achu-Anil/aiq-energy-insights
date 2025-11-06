@@ -44,8 +44,8 @@ Choose one option:
 
 ```bash
 # Clone the repository
-git clone <repo-url>
-cd aiq-backend-challenge1
+git clone https://github.com/Achu-Anil/aiq-energy-insights.git
+cd aiq-energy-insights
 
 # Start the stack
 docker-compose up --build

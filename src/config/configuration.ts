@@ -43,7 +43,7 @@ export interface Config {
  * - DB_PORT: Database port (default: 5432)
  * - DB_USERNAME: Database user (default: postgres)
  * - DB_PASSWORD: Database password (default: password)
- * - DB_NAME: Database name (default: aiq_challenge)
+ * - DB_NAME: Database name (default: aiq_energy_insights)
  * - JWT_SECRET: JWT secret key (default: your-secret-key)
  * - JWT_EXPIRES_IN: JWT expiration (default: 24h)
  *
@@ -59,7 +59,7 @@ export const config = (): Config => ({
     port: parseInt(process.env.DB_PORT || "5432", 10),
     username: process.env.DB_USERNAME || "postgres",
     password: process.env.DB_PASSWORD || "password",
-    database: process.env.DB_NAME || "aiq_challenge",
+    database: process.env.DB_NAME || "aiq_energy_insights",
   },
   jwt: {
     secret: process.env.JWT_SECRET || "your-secret-key",

@@ -17,7 +17,7 @@ export class AppService {
    * @returns {string} Friendly welcome message
    */
   getHello(): string {
-    return "Hello World! Welcome to AIQ Backend Challenge API";
+    return "Hello World! Welcome to AIQ Energy Insights API";
   }
 
   /**

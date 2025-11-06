@@ -35,7 +35,7 @@ export class AppController {
     description: "Welcome message returned successfully",
     schema: {
       type: "string",
-      example: "Hello World! Welcome to AIQ Backend Challenge API",
+      example: "Hello World! Welcome to AIQ Energy Insights API",
     },
   })
   getHello(): string {
