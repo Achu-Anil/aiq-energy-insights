@@ -150,10 +150,12 @@ describe("Plants API (E2E)", () => {
         .get("/api/v1/plants?state=t1")
         .expect(400)
         .expect((res) => {
-          const messages = Array.isArray(res.body.message) 
-            ? res.body.message 
+          const messages = Array.isArray(res.body.message)
+            ? res.body.message
             : [res.body.message];
-          expect(messages.some((msg: string) => msg.includes("2 uppercase letters"))).toBe(true);
+          expect(
+            messages.some((msg: string) => msg.includes("2 uppercase letters"))
+          ).toBe(true);
         });
     });
 
@@ -189,10 +191,12 @@ describe("Plants API (E2E)", () => {
         .get("/api/v1/plants?hacker=injection")
         .expect(400)
         .expect((res) => {
-          const messages = Array.isArray(res.body.message) 
-            ? res.body.message 
+          const messages = Array.isArray(res.body.message)
+            ? res.body.message
             : [res.body.message];
-          expect(messages.some((msg: string) => msg.includes("should not exist"))).toBe(true);
+          expect(
+            messages.some((msg: string) => msg.includes("should not exist"))
+          ).toBe(true);
         });
     });
 
