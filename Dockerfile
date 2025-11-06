@@ -97,13 +97,13 @@ USER nestjs
 EXPOSE 3000
 
 # Health check for container orchestration
-# - Checks /api/health endpoint every 30 seconds
+# - Checks /api/v1/health endpoint every 30 seconds
 # - Waits 10 seconds after startup before first check
 # - Allows 3 seconds per check before timeout
 # - Marks unhealthy after 3 consecutive failures
 # Used by Docker, Kubernetes, AWS ECS, etc.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
+  CMD node -e "require('http').get('http://localhost:3000/api/v1/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
 
 # Start the NestJS application
 # Runs compiled JavaScript (not TypeScript)

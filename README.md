@@ -10,8 +10,8 @@ A production-grade REST API for querying U.S. power plant net generation data fr
 # Start all services (PostgreSQL, Redis, NestJS app)
 docker-compose up --build
 
-# The API will be available at http://localhost:3000/api
-# Swagger docs at http://localhost:3000/api/docs
+# The API will be available at http://localhost:3000/api/v1
+# Swagger docs at http://localhost:3000/api/v1/docs
 ```
 
 This will:
@@ -111,13 +111,13 @@ src/
 └── main.ts                     # Application entry point
 ```
 
-## � API Endpoints
+## 🔧 API Endpoints
 
-**Base URL:** `http://localhost:3000/api`
+**Base URL:** `http://localhost:3000/api/v1`
 
 ### Plants
 
-#### `GET /api/plants`
+#### `GET /api/v1/plants`
 
 Get top N plants by net generation (globally or by state).
 
@@ -130,7 +130,7 @@ Get top N plants by net generation (globally or by state).
 **Example:**
 
 ```bash
-curl "http://localhost:3000/api/plants?top=5&state=CA&year=2023"
+curl "http://localhost:3000/api/v1/plants?top=5&state=CA&year=2023"
 ```
 
 **Response:**
@@ -150,19 +150,19 @@ curl "http://localhost:3000/api/plants?top=5&state=CA&year=2023"
 ]
 ```
 
-#### `GET /api/plants/:id`
+#### `GET /api/v1/plants/:id`
 
 Get individual plant details with generation history.
 
 **Example:**
 
 ```bash
-curl "http://localhost:3000/api/plants/123"
+curl "http://localhost:3000/api/v1/plants/123"
 ```
 
 ### States
 
-#### `GET /api/states`
+#### `GET /api/v1/states`
 
 Get all states with generation summary.
 
@@ -173,7 +173,7 @@ Get all states with generation summary.
 **Example:**
 
 ```bash
-curl "http://localhost:3000/api/states?year=2023"
+curl "http://localhost:3000/api/v1/states?year=2023"
 ```
 
 **Response:**
@@ -193,7 +193,7 @@ curl "http://localhost:3000/api/states?year=2023"
 ]
 ```
 
-#### `GET /api/states/:stateCode`
+#### `GET /api/v1/states/:stateCode`
 
 Get detailed information for a specific state with top plants.
 
@@ -205,14 +205,14 @@ Get detailed information for a specific state with top plants.
 **Example:**
 
 ```bash
-curl "http://localhost:3000/api/states/CA?year=2023&topPlants=5"
+curl "http://localhost:3000/api/v1/states/CA?year=2023&topPlants=5"
 ```
 
 ### Health & Documentation
 
-- `GET /api` - API information
-- `GET /api/health` - Health check endpoint
-- `GET /api/docs` - **Swagger/OpenAPI documentation** (interactive)
+- `GET /api/v1` - API information
+- `GET /api/v1/health` - Health check endpoint
+- `GET /api/v1/docs` - **Swagger/OpenAPI documentation** (interactive)
 
 ## 🏗️ Architecture
 
@@ -242,14 +242,36 @@ This project follows **Clean Architecture** principles:
 
 ### Key Features
 
+#### Core Architecture
+
 - ✅ **Modular NestJS architecture** (Controller → Service → Repository)
+- ✅ **Clean Architecture** with strict layer separation
 - ✅ **DTO validation** with `class-validator` decorators
 - ✅ **Swagger/OpenAPI documentation** on all endpoints
-- ✅ **Centralized error handling** with trace IDs
+- ✅ **API Versioning** (`/api/v1`) for future-proof evolution
+
+#### Performance & Scalability
+
 - ✅ **Redis caching** with 1-hour TTL (graceful fallback)
 - ✅ **Database optimization** (indexes, materialized views)
+- ✅ **Rate limiting** (100 requests/minute per IP via @nestjs/throttler)
+
+#### Security & Reliability
+
+- ✅ **Helmet security headers** (CSP, X-Frame-Options, HSTS, etc.)
+- ✅ **Centralized error handling** with trace IDs
+- ✅ **Input validation** with whitelisting and type transformation
+- ✅ **JWT authentication guards** (extensible stubs for future use)
+- ✅ **Role-based access control** (RBAC guards ready for implementation)
+- ✅ **Audit logging interceptor** (ready for compliance requirements)
+
+#### DevOps & Testing
+
 - ✅ **Test-Driven Development** (96%+ service coverage)
 - ✅ **Docker containerization** with multi-stage builds
+- ✅ **GitHub Actions CI/CD** with automated testing and Docker builds
+- ✅ **Health check endpoints** for Kubernetes/ECS orchestration
+- ✅ **Idempotent operations** (all endpoints are GET requests)
 
 ## 🗄️ Database Schema
 

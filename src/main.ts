@@ -20,6 +20,7 @@ import "dotenv/config"; // Load .env file into process.env
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe, Logger } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import helmet from "helmet";
 import { AppModule } from "./app.module";
 import {
   HttpExceptionFilter,
@@ -37,6 +38,27 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // ===========================
+  // Security Middleware (Helmet)
+  // ===========================
+  // helmet() sets various HTTP headers to protect against common vulnerabilities:
+  // - Content-Security-Policy: Prevents XSS attacks
+  // - X-Frame-Options: Prevents clickjacking
+  // - Strict-Transport-Security: Enforces HTTPS
+  // - X-Content-Type-Options: Prevents MIME sniffing
+  // - X-DNS-Prefetch-Control: Controls DNS prefetching
+  // - Referrer-Policy: Controls referrer information
+  app.use(
+    helmet(
+      process.env.NODE_ENV === "production"
+        ? {} // Use default security settings in production
+        : {
+            // Allow Swagger UI to load properly in development
+            contentSecurityPolicy: false,
+          }
+    )
+  );
+
+  // ===========================
   // CORS Configuration
   // ===========================
   // Enable Cross-Origin Resource Sharing for frontend applications
@@ -47,11 +69,12 @@ async function bootstrap() {
   });
 
   // ===========================
-  // Global Route Prefix
+  // Global Route Prefix with Versioning
   // ===========================
-  // All routes will be prefixed with /api
-  // Example: GET /plants becomes GET /api/plants
-  app.setGlobalPrefix("api");
+  // All routes will be prefixed with /api/v1
+  // Example: GET /plants becomes GET /api/v1/plants
+  // This allows for future API versions (v2, v3) without breaking changes
+  app.setGlobalPrefix("api/v1");
 
   // ===========================
   // Global Validation Pipeline
@@ -98,7 +121,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api/docs", app, document);
+  SwaggerModule.setup("api/v1/docs", app, document);
 
   // ===========================
   // Start Server
@@ -107,8 +130,8 @@ async function bootstrap() {
   await app.listen(port);
 
   // Log startup information
-  logger.log(`Application is running on: http://localhost:${port}/api`);
-  logger.log(`Swagger documentation: http://localhost:${port}/api/docs`);
+  logger.log(`Application is running on: http://localhost:${port}/api/v1`);
+  logger.log(`Swagger documentation: http://localhost:${port}/api/v1/docs`);
 }
 
 // Start the application

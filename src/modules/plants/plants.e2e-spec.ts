@@ -39,7 +39,7 @@ describe("Plants API (E2E)", () => {
       })
     );
 
-    app.setGlobalPrefix("api");
+    app.setGlobalPrefix("api/v1");
 
     await app.init();
   });
@@ -48,10 +48,10 @@ describe("Plants API (E2E)", () => {
     await app.close();
   });
 
-  describe("GET /api/plants", () => {
+  describe("GET /api/v1/plants", () => {
     it("should return top 10 plants by default", () => {
       return request(app.getHttpServer())
-        .get("/api/plants")
+        .get("/api/v1/plants")
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -72,7 +72,7 @@ describe("Plants API (E2E)", () => {
 
     it("should respect top parameter", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?top=5")
+        .get("/api/v1/plants?top=5")
         .expect(200)
         .expect((res) => {
           expect(res.body.length).toBeLessThanOrEqual(5);
@@ -81,7 +81,7 @@ describe("Plants API (E2E)", () => {
 
     it("should filter by state code", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?state=TX")
+        .get("/api/v1/plants?state=TX")
         .expect(200)
         .expect((res) => {
           res.body.forEach((plant: any) => {
@@ -92,7 +92,7 @@ describe("Plants API (E2E)", () => {
 
     it("should filter by year", () => {
       return request(app.getHttpServer())
-        .get(`/api/plants?year=${TEST_YEAR}`)
+        .get(`/api/v1/plants?year=${TEST_YEAR}`)
         .expect(200)
         .expect((res) => {
           res.body.forEach((plant: any) => {
@@ -103,7 +103,7 @@ describe("Plants API (E2E)", () => {
 
     it("should combine multiple filters", () => {
       return request(app.getHttpServer())
-        .get(`/api/plants?top=3&state=CA&year=${TEST_YEAR}`)
+        .get(`/api/v1/plants?top=3&state=CA&year=${TEST_YEAR}`)
         .expect(200)
         .expect((res) => {
           expect(res.body.length).toBeLessThanOrEqual(3);
@@ -116,7 +116,7 @@ describe("Plants API (E2E)", () => {
 
     it("should validate top parameter minimum", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?top=0")
+        .get("/api/v1/plants?top=0")
         .expect(400)
         .expect((res) => {
           expect(res.body.message).toContain("top must be at least 1");
@@ -125,7 +125,7 @@ describe("Plants API (E2E)", () => {
 
     it("should validate top parameter maximum", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?top=101")
+        .get("/api/v1/plants?top=101")
         .expect(400)
         .expect((res) => {
           expect(res.body.message).toContain("top cannot exceed 100");
@@ -134,7 +134,7 @@ describe("Plants API (E2E)", () => {
 
     it("should validate state code format", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?state=TEX")
+        .get("/api/v1/plants?state=TEX")
         .expect(400)
         .expect((res) => {
           expect(res.body.message).toContain(
@@ -145,7 +145,7 @@ describe("Plants API (E2E)", () => {
 
     it("should validate state code pattern", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?state=t1")
+        .get("/api/v1/plants?state=t1")
         .expect(400)
         .expect((res) => {
           expect(res.body.message).toContain("2 uppercase letters");
@@ -154,7 +154,7 @@ describe("Plants API (E2E)", () => {
 
     it("should return 404 for invalid state code", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?state=XX")
+        .get("/api/v1/plants?state=XX")
         .expect(404)
         .expect((res) => {
           expect(res.body.message).toContain("State with code 'XX' not found");
@@ -163,7 +163,7 @@ describe("Plants API (E2E)", () => {
 
     it("should validate year minimum", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?year=1899")
+        .get("/api/v1/plants?year=1899")
         .expect(400)
         .expect((res) => {
           expect(res.body.message).toContain("year must be 1900 or later");
@@ -172,7 +172,7 @@ describe("Plants API (E2E)", () => {
 
     it("should validate year maximum", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?year=2101")
+        .get("/api/v1/plants?year=2101")
         .expect(400)
         .expect((res) => {
           expect(res.body.message).toContain("year cannot exceed 2100");
@@ -181,7 +181,7 @@ describe("Plants API (E2E)", () => {
 
     it("should reject non-whitelisted parameters", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?hacker=injection")
+        .get("/api/v1/plants?hacker=injection")
         .expect(400)
         .expect((res) => {
           expect(res.body.message).toContain("should not exist");
@@ -190,7 +190,7 @@ describe("Plants API (E2E)", () => {
 
     it("should transform query parameters to correct types", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?top=5")
+        .get("/api/v1/plants?top=5")
         .expect(200)
         .expect((res) => {
           // If transformation works, the query succeeds
@@ -200,7 +200,7 @@ describe("Plants API (E2E)", () => {
 
     it("should return plants ordered by generation DESC", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?top=3")
+        .get("/api/v1/plants?top=3")
         .expect(200)
         .expect((res) => {
           if (res.body.length > 1) {
@@ -213,7 +213,7 @@ describe("Plants API (E2E)", () => {
 
     it("should include correct rank values", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?top=5")
+        .get("/api/v1/plants?top=5")
         .expect(200)
         .expect((res) => {
           res.body.forEach((plant: any, index: number) => {
@@ -223,13 +223,13 @@ describe("Plants API (E2E)", () => {
     });
   });
 
-  describe("GET /api/plants/:id", () => {
+  describe("GET /api/v1/plants/:id", () => {
     let validPlantId: number;
 
     beforeAll(async () => {
       // Get a valid plant ID for tests
       const res = await request(app.getHttpServer())
-        .get("/api/plants?top=1")
+        .get("/api/v1/plants?top=1")
         .expect(200);
 
       if (res.body.length > 0) {
@@ -243,7 +243,7 @@ describe("Plants API (E2E)", () => {
       }
 
       return request(app.getHttpServer())
-        .get(`/api/plants/${validPlantId}`)
+        .get(`/api/v1/plants/${validPlantId}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty("id");
@@ -256,7 +256,7 @@ describe("Plants API (E2E)", () => {
 
     it("should return 404 for non-existent plant ID", () => {
       return request(app.getHttpServer())
-        .get("/api/plants/999999")
+        .get("/api/v1/plants/999999")
         .expect(404)
         .expect((res) => {
           expect(res.body.message).toContain("Plant with ID 999999 not found");
@@ -264,7 +264,7 @@ describe("Plants API (E2E)", () => {
     });
 
     it("should handle invalid ID format", () => {
-      return request(app.getHttpServer()).get("/api/plants/abc").expect(400);
+      return request(app.getHttpServer()).get("/api/v1/plants/abc").expect(400);
     });
 
     it("should include generation history", () => {
@@ -273,7 +273,7 @@ describe("Plants API (E2E)", () => {
       }
 
       return request(app.getHttpServer())
-        .get(`/api/plants/${validPlantId}`)
+        .get(`/api/v1/plants/${validPlantId}`)
         .expect(200)
         .expect((res) => {
           expect(res.body.generations).toBeDefined();
@@ -291,7 +291,7 @@ describe("Plants API (E2E)", () => {
   describe("Error handling", () => {
     it("should return structured error response", () => {
       return request(app.getHttpServer())
-        .get("/api/plants?top=0")
+        .get("/api/v1/plants?top=0")
         .expect(400)
         .expect((res) => {
           expect(res.body).toHaveProperty("statusCode");
@@ -303,7 +303,7 @@ describe("Plants API (E2E)", () => {
 
     it("should handle database errors gracefully", () => {
       return request(app.getHttpServer())
-        .get("/api/plants/999999")
+        .get("/api/v1/plants/999999")
         .expect(404)
         .expect((res) => {
           expect(res.body.error).toBe("Not Found");
@@ -316,7 +316,7 @@ describe("Plants API (E2E)", () => {
       const start = Date.now();
 
       request(app.getHttpServer())
-        .get("/api/plants?top=10")
+        .get("/api/v1/plants?top=10")
         .expect(200)
         .end(() => {
           const duration = Date.now() - start;
