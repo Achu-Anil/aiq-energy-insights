@@ -29,6 +29,21 @@ describe("PlantRepository (Integration)", () => {
 
     // Verify database connection
     await prisma.$connect();
+
+    // Sanity check: Verify seed data exists
+    const stateCount = await prisma.state.count();
+    const plantCount = await prisma.plant.count();
+    
+    if (stateCount === 0 || plantCount === 0) {
+      throw new Error(
+        `⚠️  TEST DATA MISSING IN DATABASE!\n` +
+        `   States: ${stateCount}, Plants: ${plantCount}\n` +
+        `   Did you forget to run: npm run db:seed:int?\n` +
+        `   Or in CI: ensure seed step runs before tests`
+      );
+    }
+
+    console.log(`✓ Database seed verified: ${stateCount} states, ${plantCount} plants`);
   });
 
   afterAll(async () => {

@@ -132,16 +132,22 @@ jobs:
         run: npx prisma generate
 
       - name: Run database migrations
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
         run: npx prisma migrate deploy
 
+      - name: Seed test database
+        run: npm run db:seed:int
+
+      - name: Verify database setup
+        run: |
+          echo "Checking database state..."
+          npx prisma db execute --stdin <<EOF || echo "Warning: Could not verify DB"
+          SELECT 
+            (SELECT COUNT(*) FROM states) as states_count,
+            (SELECT COUNT(*) FROM plants) as plants_count,
+            (SELECT COUNT(*) FROM plant_generations) as generations_count;
+          EOF
+
       - name: Run integration tests
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
-          REDIS_HOST: localhost
-          REDIS_PORT: 6379
-          NODE_ENV: test
         run: npm run test:integration
 
       - name: Upload coverage to Codecov
