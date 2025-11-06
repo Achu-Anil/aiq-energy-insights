@@ -80,6 +80,15 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
 
+    # Job-level environment variables (available to all steps)
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+      DATABASE_URL_TEST: postgresql://test:test@localhost:5432/test_db
+      TEST_SEED_YEAR: 2023
+      NODE_ENV: test
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+
     # PostgreSQL service container
     services:
       postgres:
