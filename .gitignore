@@ -38,6 +38,3 @@ Thumbs.db
 *.swp
 *.swo
 *~
-
-# Ignore all Markdown files
-*.md
