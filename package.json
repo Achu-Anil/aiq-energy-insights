@@ -14,7 +14,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:unit": "jest --testPathIgnorePatterns=\"\\.integration\\.spec\\.ts$\" --testPathIgnorePatterns=\"\\.e2e-spec\\.ts$\"",
     "test:integration": "jest --testPathPatterns=\"\\.integration\\.spec\\.ts$\"",
-    "test:e2e": "jest --testPathPattern=\"e2e-spec\" --runInBand",
+    "test:e2e": "jest --testPathPatterns=\"e2e-spec\" --runInBand",
     "test:redis": "ts-node src/scripts/test-redis.ts",
     "test:int:ci": "npm run db:migrate && npm run db:seed:int && npm run test:integration",
     "ingest": "ts-node src/scripts/ingest.ts",
