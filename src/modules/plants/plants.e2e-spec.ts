@@ -45,8 +45,10 @@ describe("Plants API (E2E)", () => {
   });
 
   afterAll(async () => {
-    await app.close();
-  });
+    if (app) {
+      await app.close();
+    }
+  }, 10000); // Increase timeout for cleanup
 
   describe("GET /api/v1/plants", () => {
     it("should return top 10 plants by default", () => {
@@ -148,7 +150,10 @@ describe("Plants API (E2E)", () => {
         .get("/api/v1/plants?state=t1")
         .expect(400)
         .expect((res) => {
-          expect(res.body.message).toContain("2 uppercase letters");
+          const messages = Array.isArray(res.body.message) 
+            ? res.body.message 
+            : [res.body.message];
+          expect(messages.some((msg: string) => msg.includes("2 uppercase letters"))).toBe(true);
         });
     });
 
@@ -184,7 +189,10 @@ describe("Plants API (E2E)", () => {
         .get("/api/v1/plants?hacker=injection")
         .expect(400)
         .expect((res) => {
-          expect(res.body.message).toContain("should not exist");
+          const messages = Array.isArray(res.body.message) 
+            ? res.body.message 
+            : [res.body.message];
+          expect(messages.some((msg: string) => msg.includes("should not exist"))).toBe(true);
         });
     });
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param, Logger } from "@nestjs/common";
+import { Controller, Get, Query, Param, Logger, ParseIntPipe } from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
@@ -109,8 +109,13 @@ export class PlantsController {
     description: "Plant not found",
     type: ErrorResponseDto,
   })
-  async getPlantById(@Param("id") id: string) {
+  @ApiResponse({
+    status: 400,
+    description: "Invalid plant ID format",
+    type: ErrorResponseDto,
+  })
+  async getPlantById(@Param("id", ParseIntPipe) id: number) {
     this.logger.log(`GET /plants/${id}`);
-    return this.plantsService.getPlantById(Number(id));
+    return this.plantsService.getPlantById(id);
   }
 }
