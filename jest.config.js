@@ -5,10 +5,7 @@ module.exports = {
   testMatch: ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
   // Exclude integration and e2e tests from normal test runs (they require real database/running app)
   // Note: When running test:integration or test:e2e, the --testPathPatterns flag will override this
-  testPathIgnorePatterns: [
-    "/node_modules/",
-    "/dist/",
-  ],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   transform: {
     "^.+\\.ts$": "ts-jest",
   },
