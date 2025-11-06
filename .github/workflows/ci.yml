@@ -247,6 +247,13 @@ jobs:
     needs: [docker]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
+    env:
+      DATABASE_URL: postgresql://dev:dev@localhost:5432/powerplants
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      NODE_ENV: test
+      TEST_SEED_YEAR: 2023
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -260,12 +267,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - name: Start application with Docker Compose
         run: docker compose up -d
 
       - name: Wait for application to be ready
         run: |
           timeout 60 bash -c 'until curl -f http://localhost:3000/api/v1/health; do sleep 2; done'
+
+      - name: Show Docker logs (debug)
+        if: failure()
+        run: docker compose logs
 
       - name: Run E2E tests
         run: npm run test:e2e
