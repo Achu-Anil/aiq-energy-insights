@@ -1,15 +1,29 @@
-import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+// Explicitly set DATABASE_URL for integration tests
+const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  "postgresql://postgres:postgres@localhost:5432/app_db";
+console.log(
+  `Using DATABASE_URL: ${DATABASE_URL.replace(/:[^:@]+@/, ":****@")}`
+);
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: DATABASE_URL,
+    },
+  },
+});
 
 /**
  * Lightweight seed for integration tests
- * 
+ *
  * Creates minimal, deterministic test data:
  * - 3 states (TX, CA, FL)
  * - 5 plants across these states
  * - Generation data for year 2023
- * 
+ *
  * This seed is designed to be fast and reliable for CI/CD environments.
  */
 async function seedIntegration() {
@@ -39,7 +53,11 @@ async function seedIntegration() {
     // Create plants with generation data
     console.log("⚡ Creating plants and generation records...");
     const plantsData = [
-      { name: "South Texas Project", stateId: states[0].id, generation: 21787144 },
+      {
+        name: "South Texas Project",
+        stateId: states[0].id,
+        generation: 21787144,
+      },
       { name: "Comanche Peak", stateId: states[0].id, generation: 18653890 },
       { name: "Palo Verde", stateId: states[1].id, generation: 31522590 },
       { name: "Diablo Canyon", stateId: states[1].id, generation: 17892234 },
@@ -98,7 +116,9 @@ async function seedIntegration() {
         await prisma.$executeRaw`REFRESH MATERIALIZED VIEW state_generation_mv`;
         console.log("✓ Materialized view refreshed (non-concurrent)\n");
       } catch (mvError) {
-        console.log("⚠️  Materialized view refresh skipped (might not exist)\n");
+        console.log(
+          "⚠️  Materialized view refresh skipped (might not exist)\n"
+        );
       }
     }
 
@@ -119,7 +139,7 @@ async function seedIntegration() {
     // Verify test data
     const txState = await prisma.state.findUnique({ where: { code: "TX" } });
     const caState = await prisma.state.findUnique({ where: { code: "CA" } });
-    
+
     if (!txState || !caState) {
       throw new Error("Critical test data missing (TX or CA state)");
     }
