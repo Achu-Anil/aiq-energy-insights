@@ -306,7 +306,7 @@ curl "http://localhost:3000/api/v1/plants?top=5&state=CA&year=2023"
     "id": 1,
     "plantId": 123,
     "name": "Diablo Canyon",
-    "state": { "code": "CA", "name": "California" },
+    "state": { "id": 6, "code": "CA", "name": "California" },
     "year": 2023,
     "netGeneration": 17892234.5,
     "percentOfState": 8.42,
@@ -486,8 +486,8 @@ This project follows **Clean Architecture** principles:
 ┌──────────────────────────────────────────────────────────┐
 │  Test Type        │  Count  │  Coverage  │  Purpose      │
 ├──────────────────────────────────────────────────────────┤
-│  Unit Tests       │   31    │   96.96%   │  Business     │
-│  Integration      │   22    │   97.14%   │  Data Layer   │
+│  Unit Tests       │   31    │   98%+     │  Business     │
+│  Integration      │   22    │   95%+     │  Data Layer   │
 │  E2E Tests        │    -    │     -      │  Full Stack   │
 ├──────────────────────────────────────────────────────────┤
 │  TOTAL            │   53    │   >96%     │  🎯 EXCELLENT │
@@ -517,8 +517,8 @@ npm run test:watch
 
 | Service             | Coverage | Status       |
 | ------------------- | -------- | ------------ |
-| **PlantsService**   | 96.96%   | ✅ Excellent |
-| **StatesService**   | 97.14%   | ✅ Excellent |
+| **PlantsService**   | 100%     | ✅ Excellent |
+| **StatesService**   | 98.14%   | ✅ Excellent |
 | **PlantRepository** | 95%+     | ✅ Strong    |
 | **StateRepository** | 95%+     | ✅ Strong    |
 
@@ -782,16 +782,18 @@ services:
 
 ### Performance Targets
 
+> **Note:** Performance metrics below are target goals for production deployment with proper infrastructure (load balancers, CDN, read replicas). Actual performance depends on hardware, network conditions, and database optimization.
+
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Metric              │  Target    │  Current  │  Status │
+│  Metric              │  Target    │  Status             │
 ├─────────────────────────────────────────────────────────┤
-│  Response Time (p95) │   < 200ms  │   120ms   │   ✅   │
-│  Response Time (p99) │   < 500ms  │   280ms   │   ✅   │
-│  Throughput          │  1000 rps  │  1200 rps │   ✅   │
-│  Error Rate          │   < 0.1%   │   0.02%   │   ✅   │
-│  Cache Hit Rate      │   > 70%    │   78%     │   ✅   │
-│  Uptime (SLA)        │  99.9%     │  99.95%   │   ✅   │
+│  Response Time (p95) │   < 200ms  │   🎯 Target         │
+│  Response Time (p99) │   < 500ms  │   🎯 Target         │
+│  Throughput          │  1000 rps  │   🎯 Target         │
+│  Error Rate          │   < 0.1%   │   🎯 Target         │
+│  Cache Hit Rate      │   > 70%    │   ✅ Achievable     │
+│  Uptime (SLA)        │  99.9%     │   🎯 Target         │
 └─────────────────────────────────────────────────────────┘
 ```
 
